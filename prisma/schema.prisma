@@ -1,15 +1,46 @@
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
   provider = "mongodb"
-  
-  
+  url      = env("DATABASE_URL")
 }
+enum UserRole {
+  USER
+  ADMIN
+  PREMIUM_USER
+}
+
 model User {
   id    String @id @default(auto()) @map("_id") @db.ObjectId
   name  String?
   email String @unique
+  image String?
+  accounts Account[]
+  role UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @map("user_id") @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @map("refresh_token") @db.String
+  access_token      String? @map("access_token") @db.String
+  expires_at        Int?    @map("expires_at")
+  token_type        String? @map("token_type")
+  scope             String? 
+  id_token          String? @map("id_token") @db.String
+  session_state     String? @map("session_state")
+ 
+  
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+} 
