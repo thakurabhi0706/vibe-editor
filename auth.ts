@@ -67,7 +67,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 scope: account.scope,
                 id_token: account.id_token,
                 // @ts-ignore
-                sessionState: account.session_state,
+                session_state: account.session_state,
                 },
             });
             }
