@@ -1,5 +1,4 @@
 "use client"
-import { TooltipProvider } from "@/components/ui/tooltip";
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 
