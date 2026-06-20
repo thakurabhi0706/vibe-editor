@@ -13,7 +13,7 @@ import {
   Settings,
   X,
 } from "lucide-react";
-import PlaygroundEditor from "@/modules/playground/components/playground-editor";
+import {PlaygroundEditor} from "@/modules/playground/components/playground-editor";
 import { useState } from 'react';
  import {
   DropdownMenu,
@@ -42,11 +42,14 @@ import { useCallback } from 'react';
 import LoadingStep from '@/modules/playground/components/loader';
 import { toast } from 'sonner';
 import { findFilePath } from '@/modules/playground/lib';
+import ToggleAI from '@/modules/playground/components/toggle-ai';
+import { useAISuggestions } from '@/modules/playground/hooks/useAISuggestion';
 
 const MainPlaygroundPage = () => {
   const {id}= useParams<{id:string}>();
   const [isPreviewVisible, setIsPreviewVisible] = useState(true);
   const {playgroundData, templateData, isLoading, error, saveTemplateData} = usePlayground(id);
+  const aiSuggestions= useAISuggestions();
   const{ setTemplateData,
     setActiveFileId,
     setPlaygroundId,
@@ -212,8 +215,8 @@ const MainPlaygroundPage = () => {
           }
         }
 
-           const newTemplateData = await saveTemplateData(updatedTemplateData);
-        setTemplateData(newTemplateData || updatedTemplateData);
+           await saveTemplateData(updatedTemplateData);
+        setTemplateData(updatedTemplateData);
         // Update open files
         const updatedOpenFiles = openFiles.map((f) =>
           f.id === targetFileId
@@ -397,7 +400,11 @@ const MainPlaygroundPage = () => {
                 <Button variant={"default"} size={"icon"}>
                   <Bot className='size-4'/>
                 </Button>
-
+                <ToggleAI
+                isEnabled={aiSuggestions.isEnabled}
+                onToggle={aiSuggestions.toggleEnabled}
+                suggestionLoading={aiSuggestions.isLoading}
+               />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size="sm" variant="outline">
@@ -479,9 +486,23 @@ const MainPlaygroundPage = () => {
                       <PlaygroundEditor
                         activeFile={activeFile}
                         content={activeFile?.content || ""}
-                        onContentChange={(value)=>{
-                          activeFileId && updateFileContent(activeFileId, value)
+                        onContentChange={(value) => {
+                          if (activeFileId) {
+                            updateFileContent(activeFileId, value)
+                          }
                         }}
+                        suggestion={aiSuggestions.suggestion}
+                        suggestionLoading={aiSuggestions.isLoading}
+                        suggestionPosition={aiSuggestions.position}
+                        onAcceptSuggestion={(editor, monaco) =>
+                          aiSuggestions.acceptSuggestion(editor, monaco)
+                        }
+                        onRejectSuggestion={(editor) =>
+                          aiSuggestions.rejectSuggestion(editor)
+                        }
+                        onTriggerSuggestion={(type, editor) =>
+                          aiSuggestions.fetchSuggestion(type, editor)
+                        }
                       />
                     </ResizablePanel>
                     {isPreviewVisible && (

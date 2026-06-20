@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {SessionProvider} from "next-auth/react";
 import {auth} from "@/auth"
-import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
 
